@@ -34,7 +34,10 @@ class Auto_CRED {
 	public function generate_smart_cred( $atts ) {
 		
 		$atts = shortcode_atts(
-			array( 'read-only' => false ),
+			array(
+				'read-only' => false,
+				'post-type' => null,
+			),
 			$atts
 		);
 		
@@ -46,7 +49,7 @@ class Auto_CRED {
 		
 		ob_start(); ?>
 
-			<?php foreach( $this->get_all_fields() as $group_id => $field_array ) { ?>
+			<?php foreach( $this->get_all_fields( $atts['post-type'] ) as $group_id => $field_array ) { ?>
 
 				<?php foreach( explode( ',' , $field_array ) as $field_name ) { ?>
 
@@ -62,7 +65,7 @@ class Auto_CRED {
 						
 						[cred_field 
 							field='<?php echo $field_name; ?>' 
-							post='contractor-agreement' 
+							post='product' 
 							value='' 
 							urlparam='' 
 							class='<?php echo implode( ' ' , apply_filters( 'auto_cred_class' , array() , $field_name ) ); ?>'
@@ -82,6 +85,21 @@ class Auto_CRED {
 				<?php } ?>
 
 			<?php } ?>
+
+			<script>
+
+				var labels = jQuery( '.auto-cred-label' );
+				for( var i = 0; i < labels.length; i++ ) {
+					var target = jQuery( '[name="wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
+					if( target.length === 0 ) {
+						target = jQuery( '[data-item_name="date-wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
+						jQuery( labels[ i ] ).prependTo( target );
+					} else {
+						jQuery( labels[ i ] ).insertBefore( target );
+					}
+				}
+
+			</script>
 
 		<?php
 		$html = ob_get_contents();
@@ -106,15 +124,35 @@ class Auto_CRED {
 	
 	/**
 	*
+	* Check if fields should be shown for this post type
+	*
+	**/
+	
+	private function check_post_type() {
+		
+		
+		
+	}
+	
+	
+	/**
+	*
 	* Get all the fields for this post
 	*
 	**/
 	
-	public function get_all_fields() {
+	public function get_all_fields( $post_type = null ) {
 		
 		$field_groups = $this->get_all_field_groups();
 		
 		foreach( $field_groups as $field_group ) {
+			
+			$post_types = get_post_meta( $field_group->ID , '_wp_types_group_post_types' , true );
+			$post_types = explode( ',' , $post_types );
+			
+			if( $post_type !== null && ! in_array( $post_type , $post_types ) ) {
+				continue;
+			}
 			
 			$fields[ $field_group->ID ] = get_post_meta( $field_group->ID , '_wp_types_group_fields' , true );
 			
@@ -228,13 +266,13 @@ class Auto_CRED {
 				break;
 				
 			default:
-				$label = '<label>' . $field_atts['name'] . '</label>';
+				$label = '<label class="' . $field_atts['slug'] . ' auto-cred-label" data-ac-label="' . $field_atts['slug'] . '">' . $field_atts['name'] . '</label>';
 				break;
 			
 		}
 		
 		if( $force ) {
-			$label = '<label>' . $field_atts['name'] . ': </label>';
+			$label = '<label class="' . $field_atts['slug'] . ' auto-cred-label" data-ac-label="' . $field_atts['slug'] . '">' . $field_atts['name'] . '</label>';
 		}
 		
 		return $label;
