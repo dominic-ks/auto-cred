@@ -35,8 +35,13 @@ class Auto_CRED {
 		
 		$atts = shortcode_atts(
 			array(
+				'post-type' => null,
 				'read-only' => false,
 				'post-type' => null,
+				'offset' => 0,
+				'limit' => 0,
+				'shift-labels' => true,
+				'post-type' => 'post',
 			),
 			$atts
 		);
@@ -51,7 +56,21 @@ class Auto_CRED {
 
 			<?php foreach( $this->get_all_fields( $atts['post-type'] ) as $group_id => $field_array ) { ?>
 
-				<?php foreach( explode( ',' , $field_array ) as $field_name ) { ?>
+				<?php $fields = explode( ',' , $field_array );
+					
+				if( $fields[0] === '' ) {
+					$fields = array_slice( $fields , 1 );
+				}
+		
+				if( $atts['offset'] !== 0 ) {
+					$fields = array_slice( $fields , intval( $atts['offset'] ) );
+				}
+		
+				if( $atts['limit'] !== 0 ) {
+					$fields = array_slice( $fields , 0 , intval( $atts['limit'] ) );
+				} ?>
+
+				<?php foreach( $fields as $field_name ) { ?>
 
 					<?php if( $field_name === '' ) { continue; } ?>
 
@@ -62,10 +81,10 @@ class Auto_CRED {
 						<?php echo apply_filters( 'auto_cred_before_field' , '' , $field_name ); ?>
 						
 						<?php if( $atts['read-only'] != 'true' ) { ?>
-						
+							
 						[cred_field 
 							field='<?php echo $field_name; ?>' 
-							post='product' 
+							post='<?php echo $atts['post-type']; ?>' 
 							value='' 
 							urlparam='' 
 							class='<?php echo implode( ' ' , apply_filters( 'auto_cred_class' , array() , $field_name ) ); ?>'
@@ -86,20 +105,24 @@ class Auto_CRED {
 
 			<?php } ?>
 
-			<script>
+			<?php if( $atts['shift-labels'] == 'true' ) { ?>
 
-				var labels = jQuery( '.auto-cred-label' );
-				for( var i = 0; i < labels.length; i++ ) {
-					var target = jQuery( '[name="wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
-					if( target.length === 0 ) {
-						target = jQuery( '[data-item_name="date-wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
-						jQuery( labels[ i ] ).prependTo( target );
-					} else {
-						jQuery( labels[ i ] ).insertBefore( target );
+				<script>
+
+					var labels = jQuery( '.auto-cred-label' );
+					for( var i = 0; i < labels.length; i++ ) {
+						var target = jQuery( '[name="wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
+						if( target.length === 0 ) {
+							target = jQuery( '[data-item_name="date-wpcf-' + jQuery( labels[i] ).attr( 'data-ac-label' ) + '"]' );
+							jQuery( labels[ i ] ).prependTo( target );
+						} else {
+							jQuery( labels[ i ] ).insertBefore( target );
+						}
 					}
-				}
 
-			</script>
+				</script>
+
+			<?php } ?>
 
 		<?php
 		$html = ob_get_contents();
