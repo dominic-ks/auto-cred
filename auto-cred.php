@@ -4,7 +4,7 @@
  * Plugin Name: AutoCred
  * Plugin URI: https://www.bedevious.co.uk/
  * Description: This plugin provides shortcodes to automatically generate WP Types CRED forms based on field groups and rules
- * Version: 0.1
+ * Version: 0.0.2
  * Author: Be Devious Web Development
  * Author URI: Plugin URI: https://www.bedevious.co.uk/
  * License: TBC
