@@ -351,4 +351,4 @@ class Auto_CRED {
 	
 }
 
-new Auto_CRED();
+$auto_cred = new Auto_CRED();
