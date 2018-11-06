@@ -144,6 +144,8 @@ class Auto_CRED {
 	public function get_all_fields( $post_type = null ) {
 		
 		$field_groups = $this->get_all_field_groups();
+    
+    $fields = array();
 		
 		foreach( $field_groups as $field_group ) {
 			
